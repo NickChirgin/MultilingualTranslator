@@ -19,6 +19,7 @@ def main():
         12: "Russian",
         13: "Turkish"
     }
+    ln_list = ["arabic", "german", "english", "spanish", "french", "japanese", "dutch", "polish", "portuguese", "romanian", "russian", "turkish", "all"]
     result = []
     example_list = []
     original_list = []
@@ -26,7 +27,13 @@ def main():
     str_input = sys.argv
     language_orgnl = str_input[1]
     language_tranlate_to = str_input[2]
-    word = sys.argv[3]
+    word = str_input[3]
+    if language_tranlate_to not in ln_list:
+        print(f"Sorry, the program doesn't support {language_tranlate_to}")
+        exit()
+    elif language_orgnl not in ln_list:
+        print(f"Sorry, the program doesn't support {language_orgnl}")
+        exit()
     if language_tranlate_to == "all":
         all_languages(language_orgnl, ln_dict, word, headers)
     else:
@@ -34,22 +41,30 @@ def main():
             url = link(language_orgnl.lower(), language_tranlate_to.lower(), word)
             r = requests.get(url, headers=headers)
             soup = BeautifulSoup(r.content, "html.parser")
-            for item in soup.select('#translations-content .translation'):
-                result.append(item.text.strip())
-            for example in soup.select('#examples-content .example .trg .text'):
-                example_list.append(example.text.strip())
-            for original in soup.select('#examples-content .example .src .text, #examples-content .example .src .text-nikkud'):
-                original_list.append(original.text.strip())
-            print(f"{language_tranlate_to} Translations:")
-            f.writelines(f"{language_tranlate_to} Translations:" + "\n")
-            print(result[0])
-            f.writelines(result[0] + "\n")
-            print(f"{language_tranlate_to} Examples:")
-            f.writelines(f"{language_tranlate_to} Examples:" + "\n")
-            print(original_list[0])
-            f.writelines(original_list[0] + "\n")
-            print(example_list[0])
-            f.writelines(example_list[0] + "\n")
+            if r.status_code == 404:
+                print(f'Sorry, unable to find {word}')
+                exit()
+            elif r.status_code != 200:
+                print('Something wrong with your internet connection')
+                exit()
+            else:
+                for item in soup.select('#translations-content .translation'):
+                    result.append(item.text.strip())
+                for example in soup.select('#examples-content .example .trg .text'):
+                    example_list.append(example.text.strip())
+                for original in soup.select('#examples-content .example .src .text, #examples-content .example .src .text-nikkud'):
+                    original_list.append(original.text.strip())
+                print(f"{language_tranlate_to} Translations:")
+                f.writelines(f"{language_tranlate_to} Translations:" + "\n")
+                print(result[0])
+                f.writelines(result[0] + "\n")
+                print(f"{language_tranlate_to} Examples:")
+                f.writelines(f"{language_tranlate_to} Examples:" + "\n")
+                print(original_list[0])
+                f.writelines(original_list[0] + "\n")
+                print(example_list[0])
+                f.writelines(example_list[0] + "\n")
+
 
 def output(chosen_language, chosen_word):
     print(f"You chose {chosen_language} as the language to translate {chosen_word} to.")
@@ -74,22 +89,29 @@ def all_languages(original_ln, ln_dict, letter, headers):
             url = link(original_ln.lower(), translate_ln.lower(), letter)
             r = requests.get(url, headers=headers)
             soup = BeautifulSoup(r.content, "html.parser")
-            for item in soup.select('#translations-content .translation'):
-                result_list.append(item.text.strip())
-            for example in soup.select('#examples-content .example .trg .text'):
-                list_example.append(example.text.strip())
-            for original in soup.select('#examples-content .example .src .text, #examples-content .example .src .text-nikkud'):
-                list_orig.append(original.text.strip())
-            print(f"{translate_ln} Translations:")
-            f.writelines(f"{translate_ln} Translations:" + "\n")
-            print(result_list[0])
-            f.writelines(result_list[0] + "\n")
-            print(f"{translate_ln} Examples:")
-            f.writelines(f"{translate_ln} Examples:" + "\n")
-            print(list_orig[0])
-            f.writelines(list_orig[0] + "\n")
-            print(list_example[0])
-            f.writelines(list_example[0] + "\n")
+            if r.status_code == 404:
+                print(f'Sorry, unable to find {letter}')
+                exit()
+            elif r.status_code != 200:
+                print('Something wrong with your internet connection')
+                exit()
+            else:
+                for item in soup.select('#translations-content .translation'):
+                    result_list.append(item.text.strip())
+                for example in soup.select('#examples-content .example .trg .text'):
+                    list_example.append(example.text.strip())
+                for original in soup.select('#examples-content .example .src .text, #examples-content .example .src .text-nikkud'):
+                    list_orig.append(original.text.strip())
+                print(f"{translate_ln} Translations:")
+                f.writelines(f"{translate_ln} Translations:" + "\n")
+                print(result_list[0])
+                f.writelines(result_list[0] + "\n")
+                print(f"{translate_ln} Examples:")
+                f.writelines(f"{translate_ln} Examples:" + "\n")
+                print(list_orig[0])
+                f.writelines(list_orig[0] + "\n")
+                print(list_example[0])
+                f.writelines(list_example[0] + "\n")
 
 
 if __name__ == "__main__":
