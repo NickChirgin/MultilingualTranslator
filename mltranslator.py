@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-import string
+import sys
 
 
 def main():
@@ -23,16 +23,14 @@ def main():
     example_list = []
     original_list = []
     headers = {'User-Agent': 'Mozilla/5.0'}
-    print(f"Hello, you're welcome to the translator. Translator supports: {ln_dict}")
-    language1 = int(input("Type the number of your language:"))
-    language_orgnl = ln_dict.get(language1)
-    language_tranlate_to = int(input("Type the number of language you want to translate to or '0' to translate to all languages:"))
-    word = input("Type the word you want to translate:")
-    if language_tranlate_to == 0:
+    str_input = sys.argv
+    language_orgnl = str_input[1]
+    language_tranlate_to = str_input[2]
+    word = sys.argv[3]
+    if language_tranlate_to == "all":
         all_languages(language_orgnl, ln_dict, word, headers)
     else:
         with open(f"{word}.txt", "w", encoding="utf-8") as f:
-            language_tranlate_to = ln_dict.get(language_tranlate_to)
             url = link(language_orgnl.lower(), language_tranlate_to.lower(), word)
             r = requests.get(url, headers=headers)
             soup = BeautifulSoup(r.content, "html.parser")
@@ -70,7 +68,7 @@ def all_languages(original_ln, ln_dict, letter, headers):
             list_orig = []
             result_list = []
             translate_ln = ""
-            if ln_dict.get(i) == original_ln:
+            if ln_dict.get(i).lower() == original_ln:
                 continue
             translate_ln = ln_dict.get(i)
             url = link(original_ln.lower(), translate_ln.lower(), letter)
